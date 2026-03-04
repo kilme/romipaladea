@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Romina Paladea - En Construcción</title>
+    <style>
+        :root {
+            --bg-color: #fdf6f9;
+            /* Rosa muy suave */
+            --card-bg: #ffffff;
+            --text-main: #5d5d5d;
+            --accent-purple: #b2a4d4;
+            /* Lavanda pastel */
+            --accent-green: #a8dadc;
+            /* Menta pastel */
+            --wa-green: #7fd1ae;
+            /* Verde WhatsApp suave */
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            color: var(--text-main);
+        }
+
+        .card {
+            background: var(--card-bg);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            border: 1px solid #f0e6ef;
+        }
+
+        h1 {
+            color: var(--accent-purple);
+            font-weight: 300;
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+        }
+
+        p {
+            font-size: 1rem;
+            margin-bottom: 30px;
+            letter-spacing: 0.5px;
+        }
+
+        .links {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .btn {
+            text-decoration: none;
+            padding: 12px 20px;
+            border-radius: 50px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn-insta {
+            background-color: var(--accent-green);
+            color: #457b9d;
+        }
+
+        .btn-insta:hover {
+            background-color: #94ced1;
+            transform: translateY(-2px);
+        }
+
+        .btn-wa {
+            background-color: var(--wa-green);
+            color: white;
+        }
+
+        .btn-wa:hover {
+            background-color: #6bc29b;
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="card">
+        <h1>Romina Paladea</h1>
+        <p>Sitio web en construcción</p>
+
+        <div class="links">
+            <a href="https://www.instagram.com/romipaladea" target="_blank" class="btn btn-insta">
+                Instagram @romipaladea
+            </a>
+            <a href="https://wa.me/541158825314" target="_blank" class="btn btn-wa">
+                Contactar por WhatsApp
+            </a>
+        </div>
+    </div>
+</body>
+
+</html>
