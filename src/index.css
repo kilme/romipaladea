@@ -371,6 +371,40 @@ textarea { resize: vertical; min-height: 80px; }
 }
 .login-card .form-group { margin-bottom: 16px; }
 .login-card .btn-primary { width: 100%; justify-content: center; margin-top: 8px; }
+.btn-google {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 11px;
+  border: 1px solid var(--border);
+  border-radius: 50px;
+  background: #fff;
+  font-family: 'Lato', sans-serif;
+  font-size: .95rem;
+  color: var(--text);
+  cursor: pointer;
+  transition: all .2s;
+  margin-bottom: 4px;
+}
+.btn-google:hover { background: var(--bg); box-shadow: 0 2px 8px var(--shadow); }
+
+.login-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 16px 0;
+  color: var(--text-soft);
+  font-size: .82rem;
+}
+.login-divider::before, .login-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
 .login-toggle {
   text-align: center;
   margin-top: 18px;
