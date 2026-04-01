@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(git config:*)",
+      "Bash(start https://romipaladea.com.ar)",
+      "Bash(start https://analytics.google.com)"
+    ]
+  }
+}
