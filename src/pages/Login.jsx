@@ -4,7 +4,8 @@ import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   GoogleAuthProvider,
-  signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
 } from 'firebase/auth'
 import { auth } from '../firebase'
 import { useAuth } from '../context/AuthContext'
@@ -21,6 +22,10 @@ export default function Login() {
   useEffect(() => {
     if (user) navigate('/panel', { replace: true })
   }, [user, navigate])
+
+  useEffect(() => {
+    getRedirectResult(auth).catch(() => {})
+  }, [])
 
   async function handleSubmit(e) {
     e.preventDefault()
@@ -43,8 +48,7 @@ export default function Login() {
   async function handleGoogle() {
     setError('')
     try {
-      await signInWithPopup(auth, new GoogleAuthProvider())
-      navigate('/panel')
+      await signInWithRedirect(auth, new GoogleAuthProvider())
     } catch (err) {
       setError(traducirError(err.code))
     }
