@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, useParams, Link } from 'react-router-dom'
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore'
+import { collection, addDoc, doc, getDoc, updateDoc, serverTimestamp } from 'firebase/firestore'
 import { db } from '../firebase'
 import Navbar from '../components/Navbar'
 
@@ -31,11 +31,24 @@ const inicial = {
 }
 
 export default function VisitaNueva() {
-  const { id } = useParams()
+  const { id, visitaId } = useParams()
   const navigate = useNavigate()
+  const esEdicion = Boolean(visitaId)
   const [form, setForm] = useState(inicial)
   const [loading, setLoading] = useState(false)
+  const [cargando, setCargando] = useState(esEdicion)
   const [error, setError] = useState('')
+
+  useEffect(() => {
+    if (!esEdicion) return
+    getDoc(doc(db, 'consultantes', id, 'visitas', visitaId)).then(snap => {
+      if (snap.exists()) {
+        const data = snap.data()
+        setForm({ ...inicial, ...data, siAgrietados: { ...inicial.siAgrietados, ...data.siAgrietados } })
+      }
+      setCargando(false)
+    })
+  }, [id, visitaId, esEdicion])
 
   function set(field, value) {
     setForm(prev => ({ ...prev, [field]: value }))
@@ -60,10 +73,14 @@ export default function VisitaNueva() {
     if (!form.fecha) { setError('La fecha es obligatoria.'); return }
     setLoading(true)
     try {
-      await addDoc(collection(db, 'consultantes', id, 'visitas'), {
-        ...form,
-        creadoEn: serverTimestamp(),
-      })
+      if (esEdicion) {
+        await updateDoc(doc(db, 'consultantes', id, 'visitas', visitaId), { ...form })
+      } else {
+        await addDoc(collection(db, 'consultantes', id, 'visitas'), {
+          ...form,
+          creadoEn: serverTimestamp(),
+        })
+      }
       navigate(`/consultantes/${id}`)
     } catch {
       setError('Error al guardar. Intentá nuevamente.')
@@ -73,26 +90,28 @@ export default function VisitaNueva() {
 
   const tieneAgrietados = form.pezones.includes('agrietados')
 
+  if (cargando) return <><Navbar /><div className="loading">Cargando...</div></>
+
   return (
     <>
       <Navbar />
       <div className="page-content">
         <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 24 }}>
           <Link to={`/consultantes/${id}`} className="btn-ghost">← Volver</Link>
-          <h1 className="page-title" style={{ margin: 0 }}>Nueva visita</h1>
+          <h1 className="page-title" style={{ margin: 0 }}>
+            {esEdicion ? 'Editar visita' : 'Nueva visita'}
+          </h1>
         </div>
 
         {error && <div className="error-msg">{error}</div>}
 
         <form onSubmit={handleSubmit}>
           <div className="card">
-            {/* Fecha */}
             <div className="form-group" style={{ maxWidth: 200 }}>
               <label>Fecha</label>
               <input type="date" value={form.fecha} onChange={e => set('fecha', e.target.value)} required />
             </div>
 
-            {/* Prendida durante la visita */}
             <h2 className="section-title">Prendida</h2>
 
             <div className="form-group">
@@ -136,7 +155,6 @@ export default function VisitaNueva() {
               <input type="number" value={form.pesoActual} onChange={e => set('pesoActual', e.target.value)} min="0" />
             </div>
 
-            {/* Dificultades */}
             <h2 className="section-title">Dificultades</h2>
 
             <div className="form-grid">
@@ -184,7 +202,6 @@ export default function VisitaNueva() {
               <input type="text" value={form.otras} onChange={e => set('otras', e.target.value)} />
             </div>
 
-            {/* Pezones */}
             <h2 className="section-title">Pezones</h2>
 
             <div className="form-group">
@@ -230,7 +247,6 @@ export default function VisitaNueva() {
               </div>
             )}
 
-            {/* Calostro / Alimentación / Chupete */}
             <h2 className="section-title">Alimentación y técnica</h2>
 
             <div className="form-group">
@@ -267,7 +283,7 @@ export default function VisitaNueva() {
 
           <div className="btn-row">
             <button type="submit" className="btn-secondary" disabled={loading}>
-              {loading ? 'Guardando...' : 'Guardar visita'}
+              {loading ? 'Guardando...' : esEdicion ? 'Guardar cambios' : 'Guardar visita'}
             </button>
             <Link to={`/consultantes/${id}`} className="btn-ghost">Cancelar</Link>
           </div>

@@ -1,6 +1,6 @@
-import { useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore'
+import { useState, useEffect } from 'react'
+import { useNavigate, useParams, Link } from 'react-router-dom'
+import { collection, addDoc, doc, getDoc, updateDoc, serverTimestamp } from 'firebase/firestore'
 import { db } from '../firebase'
 import Navbar from '../components/Navbar'
 
@@ -31,9 +31,29 @@ const inicial = {
 
 export default function ConsultanteNuevo() {
   const navigate = useNavigate()
+  const { id } = useParams()
+  const esEdicion = Boolean(id)
   const [form, setForm] = useState(inicial)
   const [loading, setLoading] = useState(false)
+  const [cargando, setCargando] = useState(esEdicion)
   const [error, setError] = useState('')
+
+  useEffect(() => {
+    if (!esEdicion) return
+    getDoc(doc(db, 'consultantes', id)).then(snap => {
+      if (snap.exists()) {
+        const data = snap.data()
+        setForm({
+          ...inicial,
+          ...data,
+          lactanciaAnterior: data.lactanciaAnterior?.length === 4
+            ? data.lactanciaAnterior
+            : inicial.lactanciaAnterior,
+        })
+      }
+      setCargando(false)
+    })
+  }, [id, esEdicion])
 
   function set(field, value) {
     setForm(prev => ({ ...prev, [field]: value }))
@@ -65,24 +85,33 @@ export default function ConsultanteNuevo() {
     }
     setLoading(true)
     try {
-      const doc = await addDoc(collection(db, 'consultantes'), {
-        ...form,
-        creadoEn: serverTimestamp(),
-      })
-      navigate(`/consultantes/${doc.id}`)
+      if (esEdicion) {
+        await updateDoc(doc(db, 'consultantes', id), { ...form })
+        navigate(`/consultantes/${id}`)
+      } else {
+        const docRef = await addDoc(collection(db, 'consultantes'), {
+          ...form,
+          creadoEn: serverTimestamp(),
+        })
+        navigate(`/consultantes/${docRef.id}`)
+      }
     } catch {
       setError('Error al guardar. Intentá nuevamente.')
       setLoading(false)
     }
   }
 
+  if (cargando) return <><Navbar /><div className="loading">Cargando...</div></>
+
   return (
     <>
       <Navbar />
       <div className="page-content">
         <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 24 }}>
-          <Link to="/panel" className="btn-ghost">← Volver</Link>
-          <h1 className="page-title" style={{ margin: 0 }}>Nueva consultante</h1>
+          <Link to={esEdicion ? `/consultantes/${id}` : '/panel'} className="btn-ghost">← Volver</Link>
+          <h1 className="page-title" style={{ margin: 0 }}>
+            {esEdicion ? 'Editar consultante' : 'Nueva consultante'}
+          </h1>
         </div>
 
         {error && <div className="error-msg">{error}</div>}
@@ -91,7 +120,6 @@ export default function ConsultanteNuevo() {
           <div className="card">
             <h2 className="section-title" style={{ marginTop: 0 }}>Planilla de Lactancia Materna</h2>
 
-            {/* Fila 1 */}
             <div className="form-grid">
               <div className="form-group">
                 <label>Apellido y nombre del bebé</label>
@@ -103,7 +131,6 @@ export default function ConsultanteNuevo() {
               </div>
             </div>
 
-            {/* Fila 2 */}
             <div className="form-grid" style={{ marginTop: 14 }}>
               <div className="form-group">
                 <label>Apellido y nombre de la mamá</label>
@@ -115,7 +142,6 @@ export default function ConsultanteNuevo() {
               </div>
             </div>
 
-            {/* Fila 3 */}
             <div className="form-grid three" style={{ marginTop: 14 }}>
               <div className="form-group">
                 <label>Historia Clínica Nº</label>
@@ -131,7 +157,6 @@ export default function ConsultanteNuevo() {
               </div>
             </div>
 
-            {/* Fila 4 */}
             <div className="form-grid three" style={{ marginTop: 14 }}>
               <div className="form-group">
                 <label>Peso (gr)</label>
@@ -143,7 +168,6 @@ export default function ConsultanteNuevo() {
               </div>
             </div>
 
-            {/* Terminación parto */}
             <div className="form-group" style={{ marginTop: 14 }}>
               <label>Terminación del parto</label>
               <div className="radio-group">
@@ -158,7 +182,6 @@ export default function ConsultanteNuevo() {
               </div>
             </div>
 
-            {/* Gesta / Para / Abortos */}
             <div className="form-grid three" style={{ marginTop: 14 }}>
               <div className="form-group">
                 <label>Gesta</label>
@@ -174,7 +197,6 @@ export default function ConsultanteNuevo() {
               </div>
             </div>
 
-            {/* Lactancia anterior */}
             <div style={{ marginTop: 20 }}>
               <label style={{ fontWeight: 700, fontSize: '.9rem', display: 'block', marginBottom: 10 }}>
                 Duración de la lactancia en hijos/as anteriores
@@ -195,7 +217,6 @@ export default function ConsultanteNuevo() {
               </div>
             </div>
 
-            {/* Tipo de pezones */}
             <div className="form-group" style={{ marginTop: 16 }}>
               <label>Tipo de pezones</label>
               <div className="checkbox-group">
@@ -214,7 +235,6 @@ export default function ConsultanteNuevo() {
               </div>
             </div>
 
-            {/* Prendida primeras 2h */}
             <div className="form-group" style={{ marginTop: 14 }}>
               <label>¿Se prendió las primeras 2 horas?</label>
               <div className="radio-group">
@@ -229,7 +249,6 @@ export default function ConsultanteNuevo() {
               </div>
             </div>
 
-            {/* Observaciones */}
             <div className="form-group" style={{ marginTop: 16 }}>
               <label>Observaciones</label>
               <textarea
@@ -243,9 +262,9 @@ export default function ConsultanteNuevo() {
 
           <div className="btn-row">
             <button type="submit" className="btn-primary" disabled={loading}>
-              {loading ? 'Guardando...' : 'Guardar consultante'}
+              {loading ? 'Guardando...' : esEdicion ? 'Guardar cambios' : 'Guardar consultante'}
             </button>
-            <Link to="/panel" className="btn-ghost">Cancelar</Link>
+            <Link to={esEdicion ? `/consultantes/${id}` : '/panel'} className="btn-ghost">Cancelar</Link>
           </div>
         </form>
       </div>

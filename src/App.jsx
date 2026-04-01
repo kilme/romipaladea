@@ -17,7 +17,9 @@ export default function App() {
         <Route path="/panel" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
         <Route path="/consultantes/nuevo" element={<ProtectedRoute><ConsultanteNuevo /></ProtectedRoute>} />
         <Route path="/consultantes/:id" element={<ProtectedRoute><ConsultanteDetalle /></ProtectedRoute>} />
+        <Route path="/consultantes/:id/editar" element={<ProtectedRoute><ConsultanteNuevo /></ProtectedRoute>} />
         <Route path="/consultantes/:id/visita" element={<ProtectedRoute><VisitaNueva /></ProtectedRoute>} />
+        <Route path="/consultantes/:id/visitas/:visitaId/editar" element={<ProtectedRoute><VisitaNueva /></ProtectedRoute>} />
       </Routes>
     </AuthProvider>
   )
