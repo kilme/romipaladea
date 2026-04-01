@@ -42,14 +42,18 @@ export default function ConsultanteDetalle() {
   }
 
   // Calcular variación de peso respecto a la visita anterior (lista ordenada desc por fecha)
+  // Para la visita más antigua usa el peso de nacimiento de la ficha
   function variacionPeso(visita, index) {
     const pesoActual = parseFloat(visita.pesoActual)
-    if (!pesoActual || index === visitas.length - 1) return null
-    const visitaAnterior = visitas[index + 1]
-    const pesoAnterior = parseFloat(visitaAnterior?.pesoActual)
+    if (!pesoActual) return null
+    let pesoAnterior
+    if (index === visitas.length - 1) {
+      pesoAnterior = parseFloat(consultante.peso)
+    } else {
+      pesoAnterior = parseFloat(visitas[index + 1]?.pesoActual)
+    }
     if (!pesoAnterior) return null
-    const pct = ((pesoActual - pesoAnterior) / pesoAnterior) * 100
-    return pct
+    return ((pesoActual - pesoAnterior) / pesoAnterior) * 100
   }
 
   if (loading) return <><Navbar /><div className="loading">Cargando...</div></>
